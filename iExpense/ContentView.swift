@@ -10,25 +10,31 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var expenses = Expenses()
     @State private var showingAddExpense = false
+    let types = ["Business", "Personal"]
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(expenses.items) { item in
+                ForEach(types, id: \.self) { type in
+                Section(type) {
+                ForEach(expenses.items.filter { $0.type == type}) { item in
                     HStack {
                         VStack(alignment: .leading) {
                             Text(item.name)
                                 .font(.headline)
                             Text(item.type)
-
-                            Spacer()
-
-                            Text(item.amount, format: .currency(code: "USD"))
                         }
+
+                        Spacer()
+
+                        Text(item.amount, format: .currency(code: "USD"))
                     }
+                    .listRowBackground(getListRowBackgroundColor(amount: item.amount))
 
                 }
                 .onDelete(perform: removeItems)
+                }
+            }
             }
             .navigationTitle("iExpense")
             .toolbar {
@@ -45,7 +51,17 @@ struct ContentView: View {
     }
 
     func removeItems(at offsets: IndexSet) {
-        expenses.items.remove(atOffsets: offsets)
+        print("offsets: \(offsets)")
+//        expenses.items.remove(atOffsets: offsets)
+    }
+
+    func getListRowBackgroundColor(amount: Double) -> Color {
+        if amount <= 10 {
+            return Color.green
+        } else if amount <= 20 {
+            return Color.yellow
+        }
+        return Color.red
     }
 }
 
